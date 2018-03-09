@@ -8,7 +8,6 @@ class FreelogAlphaReveal extends HTMLElement {
     const instance = template.content.cloneNode(true);
 
     self.root = shadowRoot
-    self.initStyle()
     shadowRoot.appendChild(instance)
 
     self.$content = shadowRoot.querySelector('.js-reveal-content')
@@ -36,20 +35,6 @@ class FreelogAlphaReveal extends HTMLElement {
     })
 
     this.root.querySelector('.js-menu').innerHTML = html
-  }
-
-  initStyle() {
-    var styleObj = getComputedStyle(this);
-    if (isNaN(parseInt(styleObj.width))) {
-      var DefaultStyle = {
-        width: '100%',
-        height: '2500px',
-        display: 'block',
-        'max-height': '100vh'
-      };
-
-      this.style = this.obj2styleString(DefaultStyle);
-    }
   }
 
   loadData() {
@@ -167,13 +152,16 @@ class FreelogAlphaReveal extends HTMLElement {
     }
 
     initReveal(this.root)
-
-    Reveal.initialize({
-      controls: true,
-      progress: true,
-      history: false,
-      center: true,
-    });
+    setTimeout(function () {
+      Reveal.initialize({
+        width: 960,
+        height: 1000,
+        controls: true,
+        progress: true,
+        history: false,
+        center: true,
+      });
+    })
   }
 
   static get observedAttributes() {

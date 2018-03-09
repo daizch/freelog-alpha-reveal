@@ -1,6 +1,6 @@
 {
   "name": "freelog-alpha-reveal",
-  "version": "0.0.4",
+  "version": "0.0.2",
   "description": "reveal widget for freelog",
   "main": "index.js",
   "scripts": {
