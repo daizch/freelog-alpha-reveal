@@ -1,4 +1,138 @@
-#freelog-alpha-reveal-app {
-  font-size: 30px;
-  text-align: center;
+@import "../lib/reveal/css/reveal.css";
+@import "../lib/reveal/css/theme/black.css";
+
+@keyframes showUp {
+  0% {
+    opacity: 1;
+  }
+
+  25% {
+    transform: scale(1.3);
+  }
+
+  50% {
+    transform: scale(1);
+  }
+
+  75% {
+    transform: scale(1.3);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.freelog-alpha-reveal-app {
+  .reveal {
+    background-color: #222 !important;
+  }
+
+  .enter-fs-mode-tip {
+    position: absolute;
+    top: 20px;
+    color: #bdecb3;
+    right: 40px;
+    opacity: 0;
+    transition: opacity .5s .5s;
+  }
+
+
+  .show-tip {
+    opacity: 1;
+    animation: showUp 2s linear;
+  }
+
+  .reveal-content .reveal .controls,
+  .reveal-content .reveal .progress {
+    position: absolute;
+  }
+
+  .wrapper {
+    width: 100%;
+    height: 100vh;
+  }
+
+  .reveal-content {
+    margin-left: 200px;
+    height: 100%;
+  }
+
+  .menu {
+    box-sizing: border-box;
+    width: 200px;
+    float: left;
+    background: #333;
+    border-right: 1px solid #404040;
+    color: #ddd;
+    height: 100%;
+    overflow: auto;
+  }
+
+  .menu-title {
+    padding: 15px 15px 3px 15px;
+    border-bottom: 1px solid;
+    margin-bottom: 6px;
+  }
+
+  .menu li {
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #bbb;
+    padding-left: 15px;
+    height: 30px;
+    line-height: 30px;
+  }
+
+  .menu li:hover {
+    background-color: #404040;
+  }
+
+  .menu .serial {
+    padding-right: 6px;
+  }
+
+  .fullscreen .menu {
+    display: none;
+  }
+
+  .fullscreen .reveal-content {
+    width: 100%;
+    margin-left: 0;
+    float: none;
+  }
+
+  .error-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+
+  .error-content {
+    line-height: 40px;
+  }
+
+
+  .error-tip {
+    color: #E6A23C;
+  }
+
+  .action-btn {
+    display: inline-block;
+    line-height: 1;
+    white-space: nowrap;
+    border: 1px solid #b3d8ff;
+    text-align: center;
+    box-sizing: border-box;
+    outline: none;
+    padding: 6px 9px;
+    font-size: 14px;
+    border-radius: 4px;
+    color: #409eff;
+    background: #ecf5ff;
+    cursor: pointer;
+  }
 }
