@@ -22,7 +22,7 @@ class FreelogAlphaReveal extends HTMLElement {
         self.reveals = reveals
         self.renderMenu()
         self.$menuItems = shadowRoot.querySelectorAll('.js-menu-item')
-        self.bindEvent(reveals)
+        self.bindEvent()
         if (self.$menuItems.length) {
           self.$menuItems[0].click()
         }
@@ -47,8 +47,8 @@ class FreelogAlphaReveal extends HTMLElement {
     var html = '';
     var self = this;
     //资源名称为title
-    self.presentableList.forEach(function (presentable, index) {
-      var name = presentable.resourceInfo.resourceName
+    self.reveals.forEach(function (reveal, index) {
+      var name = reveal.detail.resourceInfo.resourceName
       html += `<li class="js-menu-item" data-index="${index}" title="${name}"><span class="serial">${index + 1}</span> ${name}</li>`
     })
 
@@ -57,34 +57,36 @@ class FreelogAlphaReveal extends HTMLElement {
 
   loadData() {
     var self = this;
-    return window.QI.fetch(`/v1/presentables?nodeId=${window.__auth_info__.__auth_node_id__}&resourceType=reveal_slide&tags=show`).then(function (res) {
+    return window.FreelogApp.QI.fetch(`/v1/presentables?nodeId=${window.__auth_info__.__auth_node_id__}&resourceType=reveal_slide&tags=show`).then(function (res) {
       return res.json()
     }).then(function (data) {
-      self.presentableList = data.data || [];
-      var promises = self.presentableList.map(function (resource) {
-        return window.QI.fetchPresentableResourceData(resource.presentableId)
+      var result = []
+      var presentableList = data.data || [];
+      var promises = presentableList.map(function (resource) {
+        return window.FreelogApp.QI.fetchPresentableResourceData(resource.presentableId)
+          .then(res => {
+            var isError = !res.headers.get('freelog-resource-type')
+            if (isError) {
+              return res.json()
+            } else {
+              return res.text()
+            }
+          })
+          .then(data => {
+            result.push({detail: resource, content: data})
+          })
       });
 
-      return Promise.all(promises).then(function (values) {
-        var result = []
-        values.forEach(function (res) {
-          var isError = !res.headers.get('freelog-resource-type')
-          if (isError) {
-            result.push(res.json())
-          } else {
-            result.push(res.text())
-          }
-        })
-
-        return Promise.all(result)
+      return Promise.all(promises).then(function () {
+        return result
       })
     })
   }
 
-  renderError(data, presentable, index) {
-    var App = window.FreeLogApp
-    var name = presentable.resourceInfo.resourceName
-    var errInfo = App.ExceptionCode[data.errcode] || {}
+  renderError(reveal, index) {
+    var App = window.FreelogApp
+    var name = reveal.detail.resourceInfo.resourceName
+    var errInfo = App.getErrorInfo(reveal.content)
     var html = `<div class="error-wrap fadeIn">
 <div class="error-content">
                         <div class="article-title"><h3>${name}</h3></div>
@@ -97,7 +99,7 @@ class FreelogAlphaReveal extends HTMLElement {
   }
 
   loadPresentable(presentableId) {
-    return window.QI.fetchPresentableResourceData(presentableId).then(function (res) {
+    return window.FreelogApp.QI.fetchPresentableResourceData(presentableId).then(function (res) {
       var isError = !res.headers.get('freelog-resource-type')
       return isError ? res.json() : res.text()
     })
@@ -107,15 +109,14 @@ class FreelogAlphaReveal extends HTMLElement {
     var self = this;
     var target = ev.target;
     var index = target.dataset.index;
-    var App = window.FreeLogApp
+    var App = window.FreelogApp
     var data = self.reveals[index]
-    var exception = App.ExceptionCode[data.errcode]
-    var event = exception.action || App.EventCode.invalidResponse
-    App.trigger(event, {
-      data: data,
-      callback: function (presentable) {
-        self.loadPresentable(presentable.presentableId).then(function (data) {
-          self.reveals.splice(index, 1, data)
+
+    App.trigger('HANDLE_INVALID_RESPONSE', {
+      response: data.content,
+      callback: function () {
+        self.loadPresentable(data.detail.presentableId).then(function (data) {
+          self.reveals[index].content = data
           self.setContent(index)
         })
       }
@@ -125,11 +126,11 @@ class FreelogAlphaReveal extends HTMLElement {
   setContent(index) {
     var self = this;
     var data = self.reveals[index]
-    var presentable = self.presentableList[index]
-    if (typeof data === 'string') {
-      self.content = data
+    var content = data.content
+    if (typeof content === 'string') {
+      self.content = content
     } else {
-      this.$content.innerHTML = self.renderError(data, presentable, index)
+      this.$content.innerHTML = self.renderError(data, index)
     }
   }
 
@@ -155,12 +156,6 @@ class FreelogAlphaReveal extends HTMLElement {
     ['webkitfullscreenchange', 'mozfullscreenchange', 'fullscreenchange', 'MSFullscreenChange'].forEach(function (name) {
       document.addEventListener(name, self.screenChangeHandler.bind(self), false);
     })
-  }
-
-  obj2styleString(styles) {
-    return Object.entries(styles).reduce((styleString, entry) => (
-      styleString + entry[0] + ':' + entry[1] + ';'
-    ), '');
   }
 
   renderReveal() {
