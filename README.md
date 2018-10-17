@@ -1,10 +1,6 @@
 # freelog-alpha-reveal
 
-<<<<<<< HEAD
-> A freelog widget
-=======
 > reveal widget for freelog
->>>>>>> 7a0e874d9b0fb35b19bc4fa1e6281de22efb9c48
 
 ## Build Setup
 
@@ -19,6 +15,14 @@ npm run dev
 npm run build
 ```
 
-
 ## config
 package.json中freelogConfig字段可配置freelog资源相关的配置数据。
+
+
+## usage
+
+具体写法可参看[reveal写法指导](https://github.com/hakimel/reveal.js/)
+
+
+* type: revealSlide
+* tags: show
